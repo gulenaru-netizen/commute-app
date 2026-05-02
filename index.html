@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>출퇴근 길잡이</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+html,body{min-height:100%;background:#e8e8e8;display:flex;align-items:flex-start;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:20px 0}
+@media(max-width:420px){html,body{background:#fff;padding:0}.ph{border-radius:0;border:none;min-height:100svh}}
+.ph{
+  --pb:#fff;--pb2:#f6f6f6;--pb3:#eee;
+  --pt:#0d0d0d;--pt2:#555;--pt3:#999;
+  --pbr:rgba(0,0,0,0.07);--pbr2:rgba(0,0,0,0.13);
+  --acc:#3478F6;--rd:#E24B4A;
+  width:100%;max-width:390px;background:var(--pb);
+  border-radius:26px;border:0.5px solid var(--pbr2);
+  overflow:hidden;min-height:680px;display:flex;flex-direction:column
+}
+.ph.dark{--pb:#0d0d0d;--pb2:#1b1b1b;--pb3:#262626;--pt:#f2f2f2;--pt2:#aaa;--pt3:#5a5a5a;--pbr:rgba(255,255,255,0.06);--pbr2:rgba(255,255,255,0.12)}
+.sc{display:none;flex-direction:column;flex:1}
+.sc.on{display:flex}
+.hdr{padding:18px 20px 13px;border-bottom:0.5px solid var(--pbr);display:flex;align-items:center;gap:10px;flex-shrink:0;background:var(--pb)}
+.bk{width:30px;height:30px;border-radius:50%;border:0.5px solid var(--pbr2);background:var(--pb2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--pt2);flex-shrink:0}
+.ht{font-size:15px;font-weight:500;color:var(--pt)}
+.hs{font-size:11px;color:var(--pt3);margin-top:1px}
+.dm{width:30px;height:30px;border-radius:50%;border:0.5px solid var(--pbr2);background:var(--pb2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--pt2);flex-shrink:0;margin-left:auto}
+.ck{font-size:12px;font-weight:500;color:var(--acc);font-variant-numeric:tabular-nums}
+.cnt{padding:20px;flex:1;overflow-y:auto;background:var(--pb)}
+.mlbl{font-size:11px;color:var(--pt3);letter-spacing:.4px;margin-bottom:8px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
+.fc{background:var(--pb2);border-radius:14px;padding:11px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;border:0.5px solid var(--pbr);min-width:0}
+.fc:active{background:var(--pb3)}
+.fi{width:30px;height:30px;border-radius:9px;background:var(--pb3);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.fn{flex:1;min-width:0}
+.fl{font-size:10px;color:var(--pt3);margin-bottom:1px}
+.fa{font-size:12px;font-weight:500;color:var(--pt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fe{font-size:10px;color:var(--pt3);background:var(--pb3);border:0.5px solid var(--pbr);border-radius:6px;padding:2px 6px;cursor:pointer;flex-shrink:0}
+.iw{background:var(--pb2);border-radius:16px;margin-bottom:14px;overflow:hidden;border:0.5px solid var(--pbr)}
+.ir{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.idv{height:0.5px;background:var(--pbr)}
+.ii{flex:1;border:none;background:transparent;font-size:14px;color:var(--pt);outline:none}
+.ii::placeholder{color:var(--pt3)}
+.sbt{width:100%;padding:14px;background:#3478F6;color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:500;cursor:pointer;text-align:center;display:block;user-select:none}
+.sbt:active{opacity:.85}
+.rrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--pbr);cursor:pointer}
+.rio{width:28px;height:28px;border-radius:8px;background:var(--pb2);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:var(--pt3)}
+.ac{background:var(--pb2);border-radius:14px;padding:13px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;border:0.5px solid var(--pbr)}
+.tgl{position:relative;width:40px;height:22px;flex-shrink:0}
+.tgl input{opacity:0;width:0;height:0;position:absolute}
+.tsl{position:absolute;inset:0;background:var(--pb3);border-radius:22px;cursor:pointer;transition:background .2s}
+.tsl:before{content:'';position:absolute;width:18px;height:18px;left:2px;top:2px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tgl input:checked+.tsl{background:var(--acc)}
+.tgl input:checked+.tsl:before{transform:translateX(18px)}
+.rc{background:var(--pb);border:0.5px solid var(--pbr);border-radius:18px;padding:16px;margin-bottom:10px;cursor:pointer}
+.rc:active{border-color:var(--pbr2)}
+.rc.best{border-color:#3478F6;border-width:1.5px}
+.bb{font-size:11px;color:#3478F6;font-weight:500;margin-bottom:8px}
+.rt{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px}
+.rtm{font-size:26px;font-weight:500;color:var(--pt);letter-spacing:-.8px;line-height:1}
+.rtags{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;margin-top:2px}
+.tag{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.rtimes{font-size:12px;color:var(--pt2);margin-bottom:4px;font-variant-numeric:tabular-nums}
+.ri2{font-size:12px;color:var(--pt3);margin-bottom:9px}
+.rb{display:flex;gap:2px;height:4px;border-radius:2px;overflow:hidden}
+.rs{height:4px;min-width:3px}
+.mpw{border-radius:14px;background:var(--pb2);border:0.5px solid var(--pbr);padding:14px 12px 10px;margin-bottom:14px}
+.abn{border-radius:12px;padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.tl{display:flex;flex-direction:column}
+.tlr{display:flex;position:relative}
+.tlt{width:52px;flex-shrink:0;text-align:right;padding-right:12px;padding-top:5px}
+.tlmn{font-size:13px;font-weight:500;color:var(--pt);font-variant-numeric:tabular-nums;letter-spacing:-.2px}
+.tllv{font-size:10px;color:var(--acc);margin-top:1px}
+.tlmk{width:28px;flex-shrink:0;display:flex;flex-direction:column;align-items:center}
+.tld{width:11px;height:11px;border-radius:50%;flex-shrink:0;z-index:1;margin-top:7px}
+.tlln{width:1.5px;flex:1;min-height:24px;margin-top:3px}
+.tlb{flex:1;padding-bottom:20px;padding-top:3px}
+.tlsn{font-size:14px;font-weight:500;color:var(--pt);margin-bottom:2px}
+.tldt{font-size:12px;color:var(--pt2);margin-bottom:2px}
+.tlsb{font-size:11px;color:var(--pt3)}
+.tla{display:inline-flex;align-items:center;gap:4px;border-radius:8px;padding:4px 9px;font-size:11px;margin-top:5px}
+.wb{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:500;background:rgba(22,163,74,.12);color:#16a34a;border-radius:4px;padding:1px 5px;margin-left:5px;vertical-align:middle}
+.spin{width:26px;height:26px;border:2.5px solid var(--pb3);border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
+.badge{display:inline-flex;align-items:center;gap:5px;background:rgba(0,173,159,0.08);border-radius:8px;padding:4px 10px;font-size:11px;color:#00957A;margin-bottom:14px}
+</style>
+</head>
+<body>
+<div class="ph" id="ph">
+
+<div class="sc on" id="s1">
+  <div class="hdr">
+    <div style="flex:1"><div class="ht">출퇴근 길잡이</div><div class="ck" id="ck1">--:--</div></div>
+    <div class="dm" onclick="tdark()">☀</div>
+  </div>
+  <div class="cnt">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <p class="mlbl" style="margin:0">즐겨찾기</p>
+      <span style="font-size:11px;color:var(--acc);cursor:pointer" onclick="addFav()">+ 추가</span>
+    </div>
+    <div class="fg" id="fgrid"></div>
+    <div class="iw">
+      <div class="ir"><div style="width:8px;height:8px;border-radius:50%;background:#3478F6;flex-shrink:0"></div><input class="ii" id="inf" placeholder="출발지 (예: 강남역)"></div>
+      <div class="idv"></div>
+      <div class="ir"><div style="width:8px;height:8px;border-radius:50%;background:#E24B4A;flex-shrink:0"></div><input class="ii" id="int" placeholder="도착지 (예: 홍대입구역)"></div>
+    </div>
+    <div class="sbt" onclick="gR()" role="button">경로 검색</div>
+    <p class="mlbl" style="margin-top:22px;margin-bottom:8px">최근 경로</p>
+    <div class="rrow" onclick="sR('강남역','홍대입구역')"><div class="rio">⏱</div><div><div style="font-size:13px;color:var(--pt)">강남역 → 홍대입구역</div><div style="font-size:11px;color:var(--pt3)">어제 오전 8:42</div></div></div>
+    <div class="rrow" onclick="sR('서울역','판교역')"><div class="rio">⏱</div><div><div style="font-size:13px;color:var(--pt)">서울역 → 판교역</div><div style="font-size:11px;color:var(--pt3)">그저께 오후 6:15</div></div></div>
+  </div>
+</div>
+
+<div class="sc" id="s2">
+  <div class="hdr">
+    <div class="bk" onclick="go('s1')">←</div>
+    <div style="flex:1"><div class="ht" id="rtit">경로 검색</div><div class="ck" id="ck2">--:--</div></div>
+    <div class="dm" onclick="tdark()">☀</div>
+  </div>
+  <div class="cnt">
+    <div class="ac">
+      <div><div style="font-size:13px;font-weight:500;color:var(--pt)">전 정류장 알림</div><div style="font-size:11px;color:var(--pt3);margin-top:2px">환승·도착 전 한 정거장에서 알림</div></div>
+      <label class="tgl"><input type="checkbox" id="atg" onchange="aon=this.checked"><span class="tsl"></span></label>
+    </div>
+    <div id="route-list"></div>
+  </div>
+</div>
+
+<div class="sc" id="s3">
+  <div class="hdr">
+    <div class="bk" onclick="go('s2')">←</div>
+    <div style="flex:1"><div class="ht">경로 상세</div><div class="hs" id="dsub"></div></div>
+    <div class="dm" onclick="tdark()">☀</div>
+  </div>
+  <div class="cnt" id="dc"></div>
+</div>
+
+</div>
+<script>
+let aon=false,dk=false,currentRoutes=[];
+let favs=[{id:1,nm:'집',addr:'강남역',ic:'🏠'},{id:2,nm:'회사',addr:'판교역',ic:'💼'}];
+const N=()=>new Date();
+const aM=(d,m)=>new Date(d.getTime()+m*60000);
+const fmt=d=>String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+
+function ua(){
+  const t=fmt(N());
+  document.querySelectorAll('.ck').forEach(e=>e.textContent=t);
+  document.querySelectorAll('[data-of]').forEach(e=>e.textContent=fmt(aM(N(),+e.dataset.of)));
+  currentRoutes.forEach((r,i)=>{const el=document.getElementById('rt'+i);if(el)el.textContent='출발 '+t+' · 도착 '+fmt(aM(N(),r.totalMins))});
+}
+setInterval(ua,1000);ua();
+
+function tdark(){dk=!dk;document.getElementById('ph').classList.toggle('dark',dk);document.querySelectorAll('.dm').forEach(b=>b.textContent=dk?'☾':'☀')}
+function go(id){document.querySelectorAll('.sc').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on')}
+
+function rFavs(){
+  let h='';
+  favs.forEach(f=>{h+=`<div class="fc" onclick="ufav(${f.id})"><div class="fi">${f.ic}</div><div class="fn"><div class="fl">${f.nm}</div><div class="fa">${f.addr}</div></div><span class="fe" onclick="event.stopPropagation();eFav(${f.id})">편집</span></div>`});
+  h+=`<div class="fc" onclick="addFav()" style="flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:14px 12px"><div style="font-size:22px;color:var(--pt3);line-height:1">+</div><div style="font-size:11px;color:var(--pt3)">추가</div></div>`;
+  document.getElementById('fgrid').innerHTML=h;
+}
+function addFav(){const nm=prompt('즐겨찾기 이름','');if(!nm?.trim())return;const addr=prompt('주소 또는 역명','');if(!addr?.trim())return;const ic=['⭐','🏥','🏫','☕','🍽️','🏋️','🎯','🏪'];favs.push({id:Date.now(),nm:nm.trim(),addr:addr.trim(),ic:ic[favs.length%ic.length]});rFavs()}
+function eFav(id){const idx=favs.findIndex(f=>f.id===id);if(idx<0)return;const f=favs[idx];const nm=prompt('이름 변경 (비우면 삭제)',f.nm);if(nm===null)return;if(!nm.trim()){if(confirm(`"${f.nm}" 삭제?`)){favs.splice(idx,1);rFavs()}return}const addr=prompt('주소 변경',f.addr);if(addr===null)return;favs[idx]={...f,nm:nm.trim(),addr:addr.trim()||f.addr};rFavs()}
+function ufav(id){const f=favs.find(x=>x.id===id);if(!f)return;const fi=document.getElementById('inf'),ti=document.getElementById('int');if(!fi.value)fi.value=f.addr;else ti.value=f.addr}
+function sR(a,b){document.getElementById('inf').value=a;document.getElementById('int').value=b}
+
+async function gR(){
+  const from=document.getElementById('inf').value.trim();
+  const to=document.getElementById('int').value.trim();
+  if(!from||!to){alert('출발지와 도착지를 입력해주세요');return}
+  document.getElementById('rtit').textContent=from+' → '+to;
+  document.getElementById('route-list').innerHTML=`<div style="text-align:center;padding:50px 20px"><div class="spin"></div><div style="font-size:13px;color:var(--pt3);margin-top:14px">ODsay 실시간 경로 탐색 중...</div></div>`;
+  go('s2');
+  try{
+    const data=await callRoute(from,to);
+    currentRoutes=data.routes||[];
+    if(!currentRoutes.length)throw new Error('경로를 찾지 못했어요');
+    document.getElementById('rtit').textContent=(data.from||from)+' → '+(data.to||to);
+    renderCards();
+  }catch(e){
+    document.getElementById('route-list').innerHTML=`<div style="text-align:center;padding:40px 20px"><div style="font-size:28px;margin-bottom:12px">😕</div><div style="font-size:13px;color:var(--pt)">${e.message}</div><div style="margin-top:16px;font-size:13px;color:var(--acc);cursor:pointer" onclick="go('s1')">← 돌아가기</div></div>`;
+  }
+}
+
+async function callRoute(from,to){
+  const res=await fetch(`/api/route?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok||data.error)throw new Error(data.error||'서버 오류 '+res.status);
+  return data;
+}
+
+function renderCards(){
+  const now=fmt(N());
+  let h=`<div class="badge">📡 ODsay 실시간 데이터</div>`;
+  currentRoutes.forEach((r,i)=>{
+    const bar=r.segments.map(s=>{
+      if(s.type==='subway'||s.type==='bus')return`<div class="rs" style="flex:${s.mins};background:${s.lineColor}"></div>`;
+      if(s.type==='transfer'||s.type==='walk')return`<div class="rs" style="flex:${s.mins||2};background:#22C55E;opacity:.6"></div>`;
+      return'';
+    }).join('');
+    const tags=r.tags.map(t=>`<span class="tag" style="background:${t.color}18;color:${t.color}">${t.label}</span>`).join('');
+    h+=`<div class="rc${i===0?' best':''}" onclick="gD(${i})">
+      ${i===0?'<div class="bb">가장 빠름</div>':''}
+      <div class="rt">
+        <div><div class="rtm">${r.totalMins}분</div><div class="rtimes" id="rt${i}">출발 ${now} · 도착 ${fmt(aM(N(),r.totalMins))}</div></div>
+        <div class="rtags">${tags}</div>
+      </div>
+      <div class="ri2">${r.description}${r.fare?' · '+r.fare.toLocaleString()+'원':''}</div>
+      <div class="rb">${bar}</div>
+    </div>`;
+  });
+  document.getElementById('route-list').innerHTML=h;
+}
+
+function segsToSteps(segs){
+  const steps=[];let t=0,started=false;
+  segs.forEach((seg,i)=>{
+    if(seg.type==='walk'||seg.type==='transfer'){
+      const m=seg.mins||2;
+      const isEnd=i===segs.length-1;
+      steps.push({t:'w',nm:isEnd?'목적지까지 도보':'도보 이동',dt:(seg.from&&seg.to)?seg.from+' → '+seg.to:'이동',sb:'도보 '+m+'분'+(seg.meters?' · 약 '+seg.meters+'m':' · 약 '+(m*75)+'m'),of:t,c:'#22C55E',lc:'#22C55E',prev:null});
+      t+=m;return;
+    }
+    if(seg.type!=='subway'&&seg.type!=='bus')return;
+    const sfx=seg.type==='subway'?'역':' 정류장';
+    const lc=seg.lineColor;
+    const hasMore=segs.slice(i+1).some(s=>s.type==='subway'||s.type==='bus');
+    if(!started){steps.push({t:'s',nm:seg.from+sfx,dt:seg.line+' 탑승',sb:(seg.stationCount||'?')+'정거장 · '+seg.mins+'분',of:t,c:lc,lc:lc,prev:null});started=true}
+    t+=seg.mins;
+    const pa=seg.prevAlertStation?seg.prevAlertStation+sfx:null;
+    const po=pa?t-3:null;
+    if(hasMore){const nx=segs.slice(i+1).find(s=>s.type==='subway'||s.type==='bus');steps.push({t:'x',nm:seg.to+sfx,dt:nx?nx.line+'으로 환승':'환승',sb:'',of:t,c:lc,lc:'#22C55E',prev:pa,po});}
+    else steps.push({t:'e',nm:seg.to+sfx,dt:'도착',sb:'',of:t,c:'#E24B4A',lc:null,prev:pa,po});
+  });
+  return steps;
+}
+
+function segsToMap(segs){
+  const total=segs.reduce((a,s)=>a+(s.mins||0),0)||1;
+  const W=276;let x=22,prev=null;const sg=[],st=[];
+  segs.forEach(seg=>{
+    if(seg.type==='walk'||seg.type==='transfer'){const w=Math.max(14,(seg.mins||2)/total*W);sg.push({x1:x,y1:50,x2:x+w,y2:50,c:'#22C55E',lt:'',lx:x+w/2,ly:35,dash:true});x+=w;return}
+    if(seg.type!=='subway'&&seg.type!=='bus')return;
+    const w=seg.mins/total*W;const ex=Math.min(x+w,298);
+    sg.push({x1:x,y1:50,x2:ex,y2:50,c:seg.lineColor,lt:seg.line,lx:(x+ex)/2,ly:35});
+    st.push({x,y:50,t:st.length===0?'s':'x',n:seg.from,c:seg.lineColor,c1:prev||seg.lineColor,c2:seg.lineColor});
+    prev=seg.lineColor;x=ex;
+  });
+  const last=[...segs].reverse().find(s=>s.type==='subway'||s.type==='bus');
+  if(last)st.push({x:298,y:50,t:'e',n:last.to,c:'#E24B4A'});
+  return{sg,st};
+}
+
+function bMap(m){
+  let s=`<svg viewBox="0 0 320 85" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:85px;display:block">`;
+  m.sg.forEach(g=>{
+    s+=`<line x1="${g.x1}" y1="${g.y1}" x2="${g.x2}" y2="${g.y2}" stroke="${g.c}" stroke-width="5" stroke-linecap="round"${g.dash?' stroke-dasharray="7,4"':''}/>`;
+    if(g.lt){s+=`<rect x="${g.lx-14}" y="${g.ly-7}" width="28" height="13" rx="6.5" fill="${g.c}" fill-opacity=".12"/>`;s+=`<text x="${g.lx}" y="${g.ly+4}" text-anchor="middle" font-size="8" font-family="sans-serif" font-weight="600" fill="${g.c}">${g.lt}</text>`;}
+  });
+  m.st.forEach(p=>{
+    const ly=p.t==='x'?p.y+21:p.y+19;
+    if(p.t==='s'){s+=`<circle cx="${p.x}" cy="${p.y}" r="7" fill="white" stroke="${p.c}" stroke-width="2.5"/><circle cx="${p.x}" cy="${p.y}" r="2.8" fill="${p.c}"/>`;
+    }else if(p.t==='e'){s+=`<circle cx="${p.x}" cy="${p.y}" r="7" fill="white" stroke="#E24B4A" stroke-width="2.5"/><circle cx="${p.x}" cy="${p.y}" r="2.8" fill="#E24B4A"/>`;
+    }else if(p.t==='x'){s+=`<circle cx="${p.x}" cy="${p.y}" r="9.5" fill="white" stroke="${p.c1}" stroke-width="2.5"/><circle cx="${p.x}" cy="${p.y}" r="5" fill="white" stroke="${p.c2}" stroke-width="2.5"/>`;
+    }else{s+=`<circle cx="${p.x}" cy="${p.y}" r="2.8" fill="${p.c}" fill-opacity=".45"/>`}
+    if(p.n)s+=`<text x="${p.x}" y="${ly}" text-anchor="middle" font-size="8" font-family="sans-serif" fill="#888">${p.n}</text>`;
+  });
+  return s+`</svg>`;
+}
+
+function gD(idx){
+  const r=currentRoutes[idx];
+  const steps=segsToSteps(r.segments),map=segsToMap(r.segments);
+  document.getElementById('dsub').textContent=r.totalMins+'분 · '+r.description+(r.fare?' · '+r.fare.toLocaleString()+'원':'');
+  const n=N();
+  let h=`<div class="mpw"><div style="font-size:10px;color:var(--pt3);margin-bottom:8px;letter-spacing:.4px">노선 지도</div>${bMap(map)}</div>`;
+  if(aon)h+=`<div class="abn" style="background:rgba(52,120,246,.08);margin-bottom:14px"><span style="font-size:15px">🔔</span><div><div style="font-size:12px;font-weight:500;color:#3478F6">전 정류장 알림 설정됨</div><div style="font-size:11px;color:var(--pt3);margin-top:1px">환승 및 도착 한 정거장 전 알림</div></div></div>`;
+  h+=`<div class="tl">`;
+  steps.forEach((st,i)=>{
+    const last=i===steps.length-1,isW=st.t==='w';
+    const tm=fmt(aM(n,st.of));
+    const ds=isW?`background:transparent;border:2px dashed ${st.c}`:st.t==='x'?`background:var(--pb);border:2.5px solid ${st.c};box-shadow:0 0 0 2px var(--pb),0 0 0 4.5px ${st.c}`:`background:${st.c}`;
+    const lnSt=isW?`width:0;border-left:1.5px dashed ${st.c};background:transparent`:`background:${st.lc||'var(--pbr2)'}`;
+    const badge=st.t==='x'?`<span style="font-size:9px;font-weight:500;background:${st.c};color:#fff;border-radius:4px;padding:1px 4px;margin-left:5px;vertical-align:middle">환승</span>`:isW?`<span class="wb">도보</span>`:'';
+    h+=`<div class="tlr"><div class="tlt">${isW?'<div style="font-size:13px;color:#22C55E;padding-top:6px">🚶</div>':`<div class="tlmn" data-of="${st.of}">${tm}</div>${i===0?'<div class="tllv">지금</div>':''}`}</div><div class="tlmk"><div class="tld" style="${ds}"></div>${!last?`<div class="tlln" style="${lnSt}"></div>`:''}</div><div class="tlb"><div class="tlsn">${st.nm}${badge}</div><div class="tldt">${st.dt}</div>${st.sb?`<div class="tlsb">${st.sb}</div>`:''} ${aon&&st.prev?`<div class="tla" style="background:${st.c}18"><span>🔔</span><span style="font-size:11px;color:${st.c}"><span data-of="${st.po}">${fmt(aM(n,st.po))}</span> — ${st.prev}</span></div>`:''}</div></div>`;
+  });
+  h+=`</div>`;
+  document.getElementById('dc').innerHTML=h;
+  go('s3');
+}
+
+rFavs();
+</script>
+</body>
+</html>
