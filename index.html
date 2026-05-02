@@ -139,7 +139,10 @@ html,body{min-height:100%;background:#e8e8e8;display:flex;align-items:flex-start
 </div>
 <script>
 let aon=false,dk=false,currentRoutes=[];
-let favs=[{id:1,nm:'집',addr:'강남역',ic:'🏠'},{id:2,nm:'회사',addr:'판교역',ic:'💼'}];
+const defaultFavs=[{id:1,nm:'집',addr:'',ic:'🏠'},{id:2,nm:'회사',addr:'',ic:'💼'}];
+let favs=[];
+try{favs=JSON.parse(localStorage.getItem('favs'))||defaultFavs;}catch(e){favs=defaultFavs;}
+function saveFavs(){try{localStorage.setItem('favs',JSON.stringify(favs));}catch(e){}}
 const N=()=>new Date();
 const aM=(d,m)=>new Date(d.getTime()+m*60000);
 const fmt=d=>String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
@@ -161,8 +164,8 @@ function rFavs(){
   h+=`<div class="fc" onclick="addFav()" style="flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:14px 12px"><div style="font-size:22px;color:var(--pt3);line-height:1">+</div><div style="font-size:11px;color:var(--pt3)">추가</div></div>`;
   document.getElementById('fgrid').innerHTML=h;
 }
-function addFav(){const nm=prompt('즐겨찾기 이름','');if(!nm?.trim())return;const addr=prompt('주소 또는 역명','');if(!addr?.trim())return;const ic=['⭐','🏥','🏫','☕','🍽️','🏋️','🎯','🏪'];favs.push({id:Date.now(),nm:nm.trim(),addr:addr.trim(),ic:ic[favs.length%ic.length]});rFavs()}
-function eFav(id){const idx=favs.findIndex(f=>f.id===id);if(idx<0)return;const f=favs[idx];const nm=prompt('이름 변경 (비우면 삭제)',f.nm);if(nm===null)return;if(!nm.trim()){if(confirm(`"${f.nm}" 삭제?`)){favs.splice(idx,1);rFavs()}return}const addr=prompt('주소 변경',f.addr);if(addr===null)return;favs[idx]={...f,nm:nm.trim(),addr:addr.trim()||f.addr};rFavs()}
+function addFav(){const nm=prompt('즐겨찾기 이름','');if(!nm?.trim())return;const addr=prompt('주소 또는 역명','');if(!addr?.trim())return;const ic=['⭐','🏥','🏫','☕','🍽️','🏋️','🎯','🏪'];favs.push({id:Date.now(),nm:nm.trim(),addr:addr.trim(),ic:ic[favs.length%ic.length]});saveFavs();rFavs()}
+function eFav(id){const idx=favs.findIndex(f=>f.id===id);if(idx<0)return;const f=favs[idx];const nm=prompt('이름 변경 (비우면 삭제)',f.nm);if(nm===null)return;if(!nm.trim()){if(confirm(`"${f.nm}" 삭제?`)){favs.splice(idx,1);saveFavs();rFavs()}return}const addr=prompt('주소 변경',f.addr);if(addr===null)return;favs[idx]={...f,nm:nm.trim(),addr:addr.trim()||f.addr};saveFavs();rFavs()}
 function ufav(id){const f=favs.find(x=>x.id===id);if(!f)return;const fi=document.getElementById('inf'),ti=document.getElementById('int');if(!fi.value)fi.value=f.addr;else ti.value=f.addr}
 function sR(a,b){document.getElementById('inf').value=a;document.getElementById('int').value=b}
 
